@@ -1,0 +1,7 @@
+# vim <3
+.*.sw*
+
+# /run volumes
+backend_run/
+frontend_run/
+proxy_run/

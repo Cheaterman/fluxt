@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+    backend:
+        image: cheaterman/flask
+        sysctls:
+            net.core.somaxconn: 1024
+        volumes:
+            - ./backend:/code
+            - ./backend_run:/run
+        environment:
+            WSGI_MODULE: backend:app
+            # 101: nginx gid
+            WSGI_SOCKET_GID: 101
+            TZ: Europe/Paris
+
+    frontend:
+        image: node:alpine
+        working_dir: /home/node
+        volumes:
+            - ./frontend:/home/node
+            - ./frontend_run:/run
+        command: sh -c '
+                (
+                    rm -f /run/nuxt.sock &&
+                    until [ -S /run/nuxt.sock ];
+                    do
+                        sleep 1;
+                    done;
+                    chgrp 101 /run/nuxt.sock &&
+                    chmod g+w /run/nuxt.sock;
+                ) &
+                yarn install &&
+                yarn dev
+            '
+            # 101: nginx gid
+        environment:
+            NODE_OPTIONS: --openssl-legacy-provider
+            TZ: Europe/Paris
+
+    proxy:
+        image: nginx
+        depends_on:
+            - backend
+            - frontend
+        volumes:
+            - ./nginx.conf:/etc/nginx/nginx.conf:ro
+            - ./proxy_run:/run
+            - ./backend_run:/backend_run
+            - ./frontend_run:/frontend_run
+        environment:
+            TZ: Europe/Paris
+
+# vim: se sw=4 sts=4 et:
