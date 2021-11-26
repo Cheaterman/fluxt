@@ -41,9 +41,13 @@ export default {
     '@nuxtjs/axios',
   ],
 
+  router: {
+    base: process.env.BASE_URI || '/',
+  },
+
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    baseURL: '/',  // XXX: This part probably needs to change in production
+    baseURL: process.env.BASE_URI || '/',
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build

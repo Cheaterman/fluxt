@@ -9,6 +9,7 @@ services:
             - ./backend:/code
             - ./backend_run:/run
         environment:
+            SCRIPT_NAME: $BASE_URI/api
             WSGI_MODULE: backend:app
             # 101: nginx gid
             WSGI_SOCKET_GID: 101
@@ -35,6 +36,7 @@ services:
             '
             # 101: nginx gid
         environment:
+            BASE_URI:
             NODE_OPTIONS: --openssl-legacy-provider
             TZ: Europe/Paris
 
@@ -43,12 +45,18 @@ services:
         depends_on:
             - backend
             - frontend
+        command: >
+            sh -c '
+                envsubst \$$BASE_URI < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf &&
+                exec /docker-entrypoint.sh nginx -g "daemon off;"
+            '
         volumes:
-            - ./nginx.conf:/etc/nginx/nginx.conf:ro
+            - ./nginx.conf.template:/etc/nginx/nginx.conf.template:ro
             - ./proxy_run:/run
             - ./backend_run:/backend_run
             - ./frontend_run:/frontend_run
         environment:
+            BASE_URI:
             TZ: Europe/Paris
 
 # vim: se sw=4 sts=4 et:

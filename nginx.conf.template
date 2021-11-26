@@ -5,13 +5,13 @@ events {
 http {
     server {
         listen unix:/run/nginx.sock;
-        location /api/ {
-            rewrite ^/api(/.*) /$1 break;
-            include uwsgi_params;
+        location $BASE_URI/api {
+            uwsgi_param SCRIPT_NAME $BASE_URI/api;
             uwsgi_pass unix:/backend_run/wsgi.sock;
             uwsgi_buffering off;
+            include uwsgi_params;
         }
-        location / {
+        location $BASE_URI/ {
             proxy_pass http://unix:/frontend_run/nuxt.sock;
         }
     }
