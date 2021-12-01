@@ -16,27 +16,21 @@ services:
             TZ: Europe/Paris
 
     frontend:
-        image: node:alpine
+        image: nuxt_managed_socket
+        build: frontend_image
         working_dir: /home/node
         volumes:
             - ./frontend:/home/node
             - ./frontend_run:/run
         command: sh -c '
-                (
-                    rm -f /run/nuxt.sock &&
-                    until [ -S /run/nuxt.sock ];
-                    do
-                        sleep 1;
-                    done;
-                    chgrp 101 /run/nuxt.sock &&
-                    chmod g+w /run/nuxt.sock;
-                ) &
                 yarn install &&
-                yarn dev
+                yarn build &&
+                yarn start
             '
-            # 101: nginx gid
         environment:
             BASE_URI:
+            # 101: nginx gid
+            SOCKET_GID: 101
             NODE_OPTIONS: --openssl-legacy-provider
             TZ: Europe/Paris
 
