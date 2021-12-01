@@ -33,6 +33,7 @@ export default {
 
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
+    '@nuxtjs/tailwindcss',
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
@@ -53,7 +54,7 @@ export default {
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
     cache: true,
-    parallel: true,
     hardSource: true,
   },
 }
+// vim: se sw=2 sts=2:
