@@ -52,9 +52,6 @@ export default {
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
-  build: {
-    cache: true,
-    hardSource: true,
-  },
+  build: {},
 }
 // vim: se sw=2 sts=2:
