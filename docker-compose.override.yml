@@ -1,8 +1,18 @@
 version: '3.8'
 
 services:
+    backend:
+        volumes:
+            - ./backend:/code
+        environment:
+            UWSGI_PY_AUTORELOAD: 1
+
     frontend:
+        volumes:
+            - ./frontend:/home/node
         command: sh -c '
                 yarn install &&
                 yarn dev
             '
+
+# vim: se sw=4 sts=4 et:
