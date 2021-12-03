@@ -3,7 +3,6 @@ version: '3.8'
 services:
     backend:
         image: nuxtflask/backend:${TAG}
-        build: backend
         sysctls:
             net.core.somaxconn: 1024
         volumes:
@@ -17,7 +16,6 @@ services:
 
     frontend:
         image: nuxtflask/frontend:${TAG}
-        build: frontend
         volumes:
             - ./frontend_run:/run
         environment:

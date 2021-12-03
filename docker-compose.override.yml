@@ -2,12 +2,14 @@ version: '3.8'
 
 services:
     backend:
+        build: backend
         volumes:
             - ./backend:/code
         environment:
             UWSGI_PY_AUTORELOAD: 1
 
     frontend:
+        build: frontend
         volumes:
             - ./frontend:/home/node
         command: sh -c '
