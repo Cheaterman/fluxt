@@ -1,5 +1,5 @@
 #!/bin/sh
-docker-compose up --build -d &&
+docker-compose up -d &&
 uwsgi \
     --master \
     --plugin http \
