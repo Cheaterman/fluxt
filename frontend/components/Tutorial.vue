@@ -70,3 +70,4 @@ export default {
   },
 }
 </script>
+// vim: se sw=2 sts=2:
