@@ -5,6 +5,7 @@ services:
         image: nuxtflask/backend:${TAG}
         sysctls:
             net.core.somaxconn: 1024
+        restart: always
         volumes:
             - ./backend_run:/run
         environment:
@@ -16,6 +17,7 @@ services:
 
     frontend:
         image: nuxtflask/frontend:${TAG}
+        restart: always
         volumes:
             - ./frontend_run:/run
         environment:
@@ -29,6 +31,7 @@ services:
         depends_on:
             - backend
             - frontend
+        restart: always
         command: >
             sh -c '
                 envsubst \$$BASE_URI < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf &&
