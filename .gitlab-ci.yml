@@ -21,7 +21,7 @@ build:
     only:
         refs:
             - staging
-            - master
+            - main
 
 test:
     stage: test
@@ -46,7 +46,7 @@ release:
         - TAG=latest docker-compose push
     only:
         refs:
-            - master
+            - main
 
 deploy:staging:
     stage: deploy
@@ -86,7 +86,7 @@ deploy:staging:
     only:
         refs:
             - staging
-            - master
+            - main
 
 deploy:production:
     stage: deploy
@@ -124,4 +124,4 @@ deploy:production:
     when: manual
     only:
         refs:
-            - master
+            - main
