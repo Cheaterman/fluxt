@@ -7,6 +7,18 @@ stages:
 variables:
     DOCKER_TLS_CERTDIR: '/certs'
     TAG: $CI_COMMIT_REF_SLUG
+    SSH_PRIVATE_KEY:
+        description: 'Private SSH key for a given deployment environment.'
+    TARGET_USER:
+        description: 'User name for a given deployment environment.'
+    TARGET_HOST:
+        description: 'Host for a given deployment environment.'
+    TARGET_DIRECTORY:
+        description: 'Absolute path to target folder for a given deployment environment.'
+    STAGING_URL:
+        description: 'URL where the staging deployment can be seen.'
+    PRODUCTION_URL:
+        description: 'URL where the production deployment can be seen.'
 
 services:
     - docker:dind
