@@ -16,16 +16,31 @@
           To get started, remove <code class="bg-gray-100 text-sm p-1 rounded border">components/Tutorial.vue</code> and start coding in <code class="bg-gray-100 text-sm p-1 rounded border">pages/index.vue</code>. Have fun!
         </p>
         <p class="my-4 pt-4 text-gray-800 border-t border-dashed">
-          As a bonus, a Flask backend route has been configured with a friendly message. Press the button below to see it:
+          As a bonus, a Flask backend app has been configured to view and send messages:
         </p>
-        <button
-          class="bg-blue-500 hover:bg-blue-700 rounded p-2 text-white"
-          @click="fetchMessage"
+        <p
+          ref="container"
+          class="h-40 overflow-scroll mt-4 bg-gray-100 text-sm font-mono p-1 rounded border"
         >
-          Press me!
-        </button>
-        <h3 class="mt-4">Message:</h3>
-        <pre class="mt-4 bg-gray-100 text-sm p-1 rounded border">{{ message }}</pre>
+          <template v-for="(message, index) in messages">
+            {{ message.text }}<br>
+          </template>
+        </p>
+        <div
+          class="flex flex-row gap-2 mt-2"
+        >
+          <input
+            class="flex-grow bg-gray-100 text-sm p-1 rounded border"
+            v-model="text"
+            @keyup.enter="sendMessage"
+          >
+          <button
+            class="bg-blue-500 hover:bg-blue-700 rounded p-2 text-white"
+            @click="sendMessage"
+          >
+            Send
+          </button>
+        </div>
       </div>
       <div class="flex justify-center pt-4 space-x-2">
         <a href="https://github.com/nuxt/nuxt.js" target="_blank"><svg
@@ -59,14 +74,44 @@
 export default {
   data() {
     return {
-      message: '',
+      text: '',
+      messages: [],
     }
   },
   methods: {
-    async fetchMessage() {
-      const response = await this.$axios.$get('/api/')
-      this.message = response.message
+    async sendMessage() {
+      if (!this.text)
+        return
+
+      const message = {text: this.text}
+      this.messages.push(message)
+      this.text = ''
+      this.scrollToBottom()
+      try {
+        const response = await this.$axios.$post('/api/messages', message)
+      }
+      catch {
+        await this.loadMessages()
+      }
     },
+    async loadMessages() {
+      try {
+        const response = await this.$axios.$get('/api/messages')
+        this.messages = response.messages
+      }
+      catch {
+        this.messages = []
+      }
+      this.scrollToBottom()
+    },
+    scrollToBottom() {
+      this.$nextTick(() => {
+        this.$refs.container.scrollTop = 9999
+      })
+    }
+  },
+  async mounted() {
+    await this.loadMessages()
   },
 }
 </script>

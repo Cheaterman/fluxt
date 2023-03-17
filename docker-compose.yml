@@ -9,10 +9,20 @@ services:
         volumes:
             - ./backend_run:/run
         environment:
+            DB_PASSWORD:
             SCRIPT_NAME: $BASE_URI/api
-            WSGI_MODULE: backend:app
+            WSGI_MODULE: backend:create_app()
             # 101: nginx gid
             WSGI_SOCKET_GID: 101
+            TZ: Europe/Paris
+
+    db:
+        image: postgres:15-alpine
+        restart: always
+        volumes:
+            - ./db_data:/var/lib/postgresql/data
+        environment:
+            POSTGRES_PASSWORD: $DB_PASSWORD
             TZ: Europe/Paris
 
     frontend:
