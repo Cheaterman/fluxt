@@ -86,6 +86,7 @@ deploy:staging:
                 --no-deps \\
                 --detach \\
             &&
+            echo 'flask db upgrade' | TAG=$TAG docker-compose run --rm backend sh &&
             echo '
             pip install -r requirements-test.txt &&
             COVERAGE_FILE=/tmp/coverage pytest
@@ -128,6 +129,7 @@ deploy:production:
                 --no-deps \\
                 --detach \\
             &&
+            echo 'flask db upgrade' | TAG=$TAG docker-compose run --rm backend sh &&
             docker image prune -f
             "
     environment:
