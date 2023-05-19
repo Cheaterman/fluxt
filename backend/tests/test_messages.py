@@ -48,3 +48,6 @@ def test_messages_post_valid(client):
     assert Message.query.count() == before_count + 1
     last_message = Message.query.order_by(Message.id.desc()).first()
     assert last_message.text == 'Some text'
+
+    data = client.get('/messages').json
+    assert data['messages'][-1]['text'] == 'Some text'
