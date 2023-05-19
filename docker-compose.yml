@@ -9,6 +9,9 @@ services:
         volumes:
             - ./backend_run:/run
         environment:
+            SECRET_KEY:
+            ADMIN_PASSWORD:
+            DB_HOST:
             DB_PASSWORD:
             SCRIPT_NAME: $BASE_URI/api
             WSGI_MODULE: backend:create_app()

@@ -1,6 +1,6 @@
 from flask import abort, request
 
-from . import api
+from . import api, auth
 from backend.model import Message, db
 
 
@@ -13,13 +13,27 @@ def messages_list():
 
 
 @api.post('/messages')
-def messages_post():
+def messages_add():
     json = request.json
 
-    if 'text' not in json or not json['text']:
+    if not json.get('text'):
         abort(400, 'expected_text')
 
     db.session.add(Message(text=json['text']))
     db.session.commit()
 
     return '', 201
+
+
+@api.delete('/messages/<int:id>')
+@auth.login_required
+def messages_delete(id):
+    message = db.session.get(Message, id)
+
+    if not message:
+        abort(404, 'invalid_message_id')
+
+    db.session.delete(message)
+    db.session.commit()
+
+    return '', 204
