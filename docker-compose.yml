@@ -6,6 +6,8 @@ services:
         sysctls:
             net.core.somaxconn: 1024
         restart: always
+        depends_on:
+            - db
         volumes:
             - ./backend_run:/run
         environment:
