@@ -28,7 +28,7 @@ build:
     image: cheaterman/docker-compose
     script:
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker-compose build --pull
+        - COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose build --pull
         - docker-compose push
     only:
         refs:
@@ -45,7 +45,8 @@ test:
         - |
             echo '
             pip install -r requirements-test.txt &&
-            COVERAGE_FILE=/tmp/coverage pytest -o cache_dir=/tmp/cache
+            COVERAGE_FILE=/tmp/coverage \\
+            pytest -o cache_dir=/tmp/cache
             ' | docker-compose run --rm backend sh
 
 release:
@@ -72,7 +73,9 @@ deploy:staging:
         - chmod 700 ~/.ssh
         - |
             scp -o StrictHostKeyChecking=accept-new \
-            docker-compose.yml nginx.conf.template "${TARGET_USER}@${TARGET_HOST}:${TARGET_DIRECTORY}/"
+            docker-compose.yml \
+            nginx.conf.template \
+            "${TARGET_USER}@${TARGET_HOST}:${TARGET_DIRECTORY}/"
         - |
             ssh "${TARGET_USER}@${TARGET_HOST}" \
             -oStrictHostKeyChecking=accept-new \
@@ -87,10 +90,12 @@ deploy:staging:
                 --no-deps \\
                 --detach \\
             &&
-            echo 'flask db upgrade' | TAG=$TAG docker-compose run --rm backend sh &&
+            echo 'flask db upgrade' \\
+            | TAG=$TAG docker-compose run --rm backend sh &&
             echo '
             pip install -r requirements-test.txt &&
-            COVERAGE_FILE=/tmp/coverage pytest -o cache_dir=/tmp/cache
+            COVERAGE_FILE=/tmp/coverage \\
+            pytest -o cache_dir=/tmp/cache
             ' | TAG=$TAG docker-compose run --rm backend sh &&
             docker image prune -f
             "
@@ -115,7 +120,9 @@ deploy:production:
         - chmod 700 ~/.ssh
         - |
             scp -o StrictHostKeyChecking=accept-new \
-            docker-compose.yml nginx.conf.template "${TARGET_USER}@${TARGET_HOST}:${TARGET_DIRECTORY}/"
+            docker-compose.yml \
+            nginx.conf.template \
+            "${TARGET_USER}@${TARGET_HOST}:${TARGET_DIRECTORY}/"
         - |
             ssh "${TARGET_USER}@${TARGET_HOST}" \
             -oStrictHostKeyChecking=accept-new \
@@ -130,7 +137,8 @@ deploy:production:
                 --no-deps \\
                 --detach \\
             &&
-            echo 'flask db upgrade' | TAG=$TAG docker-compose run --rm backend sh &&
+            echo 'flask db upgrade' \\
+            | TAG=$TAG docker-compose run --rm backend sh &&
             docker image prune -f
             "
     environment:
