@@ -1,3 +1,6 @@
+const command = process.env.npm_lifecycle_event
+const BASE_URI = process.env.BASE_URI || (command === 'build' ? './' : '/')
+
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
@@ -43,12 +46,12 @@ export default {
   ],
 
   router: {
-    base: process.env.BASE_URI || '/',
+    base: BASE_URI,
   },
 
   publicRuntimeConfig: {
     axios: {
-      baseURL: process.env.BASE_URI || '/',
+      baseURL: BASE_URI,
     },
   },
 
