@@ -50,6 +50,7 @@ services:
         command: >
             sh -c '
                 envsubst \$$BASE_URI < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf &&
+                rm -f /run/nginx.* &&
                 exec /docker-entrypoint.sh nginx -g "daemon off;"
             '
         volumes:
