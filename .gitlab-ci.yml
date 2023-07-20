@@ -45,7 +45,7 @@ test:
         - |
             echo '
             pip install -r requirements-test.txt &&
-            COVERAGE_FILE=/tmp/coverage \\
+            COVERAGE_FILE=/tmp/coverage \
             pytest -o cache_dir=/tmp/cache
             ' | docker-compose run --rm backend sh
 
