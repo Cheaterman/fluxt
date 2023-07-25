@@ -25,7 +25,9 @@ def bad_request(error):
 
 @auth.error_handler
 def error_handler(status_code):
-    return {'message': error_messages.get(status_code, 'unknown_error')}
+    return {
+        'message': error_messages.get(status_code, 'unknown_error')
+    }, status_code
 
 
 @auth.verify_password
