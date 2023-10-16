@@ -17,8 +17,8 @@ services:
         volumes:
             - ./frontend:/home/node
         command: sh -c '
-                yarn install &&
-                yarn dev
+                pnpm install &&
+                pnpm dev --socket /run/nuxt.sock
             '
 
 # vim: se sw=4 sts=4 et:

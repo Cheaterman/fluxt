@@ -13,6 +13,8 @@ http {
         }
         location $BASE_URI/ {
             proxy_pass http://unix:/frontend_run/nuxt.sock;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "Upgrade";
         }
     }
 }

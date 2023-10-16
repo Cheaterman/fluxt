@@ -8,7 +8,7 @@ socket_gid=${SOCKET_GID:-0}
     do
         sleep 1;
     done;
-    chgrp $socket_gid /run/nuxt.sock &&
+    chgrp "$socket_gid" /run/nuxt.sock &&
     chmod g+w /run/nuxt.sock;
 ) &
 

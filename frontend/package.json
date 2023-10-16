@@ -1,18 +1,23 @@
 {
-  "name": "frontend",
-  "version": "1.0.0",
+  "name": "nuxt-app",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "nuxt",
     "build": "nuxt build",
-    "start": "nuxt start",
-    "generate": "nuxt generate"
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
   },
-  "dependencies": {
-    "@nuxtjs/axios": "^5.13.6",
-    "@nuxtjs/tailwindcss": "^4.2.1",
-    "core-js": "^3.15.1",
-    "nuxt": "^2.15.7"
+  "devDependencies": {
+    "@nuxt/devtools": "latest",
+    "nuxt": "^3.7.4",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.5"
   },
-  "devDependencies": {}
+  "pnpm": {
+    "overrides": {
+      "nuxi": "Cheaterman/nuxi#ipc-listhen"
+    }
+  }
 }

@@ -1,16 +1,16 @@
 FROM node:lts-alpine
 
+ENV NITRO_UNIX_SOCKET=/run/nuxt.sock
+
 COPY docker-entrypoint.sh /usr/local/bin
 COPY . /home/node
 
 WORKDIR /home/node
 
-# See https://github.com/vercel/next.js/issues/30078#issuecomment-947338268
-ENV NODE_OPTIONS=--openssl-legacy-provider
-
 RUN sh -c " \
-        yarn install && \
-        yarn build \
+        npm install -g pnpm && \
+        pnpm install && \
+        NITRO_PRESET=node-cluster pnpm build \
     "
 
-CMD ["yarn", "start"]
+CMD ["node", ".output/server/index.mjs"]

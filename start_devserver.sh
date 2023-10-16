@@ -1,5 +1,9 @@
 #!/bin/sh
 docker compose up -d &&
+(
+    sleep .25 &&
+    echo -e "\n\n\t\e[32m✔\e[0m Fluxt is listening on http://0.0.0.0:8080\n\n" &
+) &&
 uwsgi \
     --master \
     --plugin http \

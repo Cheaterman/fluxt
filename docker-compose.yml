@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
     backend:
-        image: nuxtflask/backend:${TAG}
+        image: fluxt/backend:${TAG}
         sysctls:
             net.core.somaxconn: 1024
         restart: always
@@ -22,7 +22,7 @@ services:
             TZ: Europe/Paris
 
     db:
-        image: postgres:15-alpine
+        image: postgres:16-alpine
         restart: always
         volumes:
             - ./db_data:/var/lib/postgresql/data
@@ -31,7 +31,7 @@ services:
             TZ: Europe/Paris
 
     frontend:
-        image: nuxtflask/frontend:${TAG}
+        image: fluxt/frontend:${TAG}
         restart: always
         volumes:
             - ./frontend_run:/run
