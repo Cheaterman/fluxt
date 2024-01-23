@@ -4,7 +4,6 @@ import pytest
 from flask import Flask, session
 from flask.testing import FlaskClient
 
-from backend import create_app
 from backend.model.user import Role
 
 

@@ -1,7 +1,7 @@
 """Initial migration - create message table
 
 Revision ID: 4a2253497ee2
-Revises: 
+Revises:
 Create Date: 2023-03-15 18:38:42.615235
 
 """
