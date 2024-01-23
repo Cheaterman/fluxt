@@ -1,8 +1,5 @@
 from flask import Flask
-
-
-class ConfigurationError(Exception):
-    pass
+from flask_marshmallow_openapi import OpenAPISettings, OpenAPI  # type: ignore
 
 
 def create_app(config=None):
@@ -12,17 +9,30 @@ def create_app(config=None):
     if config:
         app.config.from_mapping(config)
 
-    if not app.config.get('ADMIN_PASSWORD'):
-        raise ConfigurationError(
-            'You cannot leave your admin area unprotected: '
-            'set ADMIN_PASSWORD environment variable.'
-        )
-
     from .model import db, migrate
     db.init_app(app)
     migrate.init_app(app, db)
 
+    # See https://github.com/marshmallow-code/apispec/issues/444
+    import warnings
+    warnings.filterwarnings(
+        "ignore",
+        message="Multiple schemas resolved to the name "
+    )
+
     from .api import api
     app.register_blueprint(api)
+
+    if (
+        app.config.get('ENABLE_DOCS')
+        # For coverage
+        or app.config.get('TESTING')
+    ):
+        docs = OpenAPI(config=OpenAPISettings(
+            api_name='fluxt API',
+            api_version='v1',
+            app_package_name=f'{__name__}.api',
+        ))
+        docs.init_app(app)
 
     return app

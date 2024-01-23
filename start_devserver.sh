@@ -11,6 +11,7 @@ uwsgi \
     --http :8080 \
     --route '.* http:proxy_run/nginx.sock' \
     -z 3600 \
+    --http-timeout 3600 \
     --workers 4 \
     --threads 64 \
     --ignore-sigpipe \

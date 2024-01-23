@@ -25,11 +25,11 @@ services:
 
 build:
     stage: build
-    image: cheaterman/docker-compose
+    image: docker
     script:
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose build --pull
-        - docker-compose push
+        - docker compose build
+        - docker compose push
     only:
         refs:
             - staging
@@ -37,27 +37,29 @@ build:
 
 test:
     stage: test
-    image: cheaterman/docker-compose
+    image: docker
     script:
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker-compose pull backend
-        - docker-compose up -d db
+        - docker compose pull backend
+        - docker compose up -d db
         - |
             echo '
             pip install -r requirements-test.txt &&
+            flake8 && \
+            mypy && \
             COVERAGE_FILE=/tmp/coverage \
             pytest -o cache_dir=/tmp/cache
-            ' | docker-compose run --rm backend sh
+            ' | docker compose run --rm backend sh
 
 release:
     stage: release
-    image: cheaterman/docker-compose
+    image: docker
     script:
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker-compose pull
+        - docker compose pull
         - docker tag $CI_REGISTRY_IMAGE/backend:$TAG $CI_REGISTRY_IMAGE/backend:latest
         - docker tag $CI_REGISTRY_IMAGE/frontend:$TAG $CI_REGISTRY_IMAGE/frontend:latest
-        - TAG=latest docker-compose push
+        - TAG=latest docker compose push
     only:
         refs:
             - main
@@ -82,21 +84,22 @@ deploy:staging:
             "
             cd \"${TARGET_DIRECTORY}\" &&
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
-            TAG=$TAG docker-compose pull &&
+            export TAG=$TAG CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE &&
+            docker compose pull &&
             rm -rf ~/.docker &&
-            TAG=$TAG docker-compose \\
+            docker compose \\
                 up \\
                 --renew-anon-volumes \\
                 --no-deps \\
                 --detach \\
             &&
             echo 'flask db upgrade' \\
-            | TAG=$TAG docker-compose run --rm backend sh &&
+            | docker compose run --rm backend sh &&
             echo '
             pip install -r requirements-test.txt &&
             COVERAGE_FILE=/tmp/coverage \\
             pytest -o cache_dir=/tmp/cache
-            ' | TAG=$TAG docker-compose run --rm backend sh &&
+            ' | docker compose run --rm backend sh &&
             docker image prune -f
             "
     environment:
@@ -129,16 +132,17 @@ deploy:production:
             "
             cd \"${TARGET_DIRECTORY}\" &&
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
-            TAG=$TAG docker-compose pull &&
+            export TAG=$TAG CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE &&
+            docker compose pull &&
             rm -rf ~/.docker &&
-            TAG=$TAG docker-compose \\
+            docker compose \\
                 up \\
                 --renew-anon-volumes \\
                 --no-deps \\
                 --detach \\
             &&
             echo 'flask db upgrade' \\
-            | TAG=$TAG docker-compose run --rm backend sh &&
+            | docker compose run --rm backend sh &&
             docker image prune -f
             "
     environment:

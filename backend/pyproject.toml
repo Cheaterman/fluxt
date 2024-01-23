@@ -1,0 +1,20 @@
+[tool.pytest.ini_options]
+norecursedirs = ['.*', 'env']
+addopts = [
+    '-Werror',
+    '--cov=backend',
+    '--cov-report=term-missing',
+    '--cov-fail-under=100',
+    '--color=yes',
+]
+
+[tool.mypy]
+strict = true
+files = ['backend', 'tests']
+
+[tool.flake8]
+exclude = [
+    '.git',
+    '__pycache__',
+    'env',
+]
