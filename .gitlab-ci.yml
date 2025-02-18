@@ -23,29 +23,45 @@ variables:
 services:
     - docker:dind
 
+.docker:
+    image: docker:27.4.1
+    before_script:
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+.ssh:
+    image: alpine:3.21.2
+    before_script:
+        - apk add openssh
+        - eval $(ssh-agent -s)
+        - mkdir -p ~/.ssh
+        - echo -e "Host *\n\tStrictHostKeyChecking accept-new\n" > ~/.ssh/config
+
+workflow:
+    rules:
+        - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+        - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+          when: never
+        - if: $CI_COMMIT_BRANCH
+
 build:
     stage: build
-    image: docker
+    extends:
+        - .docker
     script:
-        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         - docker compose build
         - docker compose push
-    only:
-        refs:
-            - staging
-            - main
 
 test:
     stage: test
-    image: docker
+    extends:
+        - .docker
     script:
-        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         - docker compose pull backend
         - docker compose up -d db
         - |
             echo '
             pip install -r requirements-test.txt &&
-            flake8 && \
+            ruff check && \
             mypy && \
             COVERAGE_FILE=/tmp/coverage \
             pytest -o cache_dir=/tmp/cache
@@ -53,9 +69,9 @@ test:
 
 release:
     stage: release
-    image: docker
+    extends:
+        - .docker
     script:
-        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         - docker compose pull
         - docker tag $CI_REGISTRY_IMAGE/backend:$TAG $CI_REGISTRY_IMAGE/backend:latest
         - docker tag $CI_REGISTRY_IMAGE/frontend:$TAG $CI_REGISTRY_IMAGE/frontend:latest
@@ -66,21 +82,17 @@ release:
 
 deploy:staging:
     stage: deploy
-    image: alpine
+    extends:
+        - .ssh
     script:
-        - apk update && apk add openssh rsync
-        - eval $(ssh-agent -s)
-        - echo "$SSH_PRIVATE_KEY" | ssh-add -
-        - mkdir ~/.ssh
-        - chmod 700 ~/.ssh
+        - ssh-add <(echo "$SSH_PRIVATE_KEY")
         - |
-            scp -o StrictHostKeyChecking=accept-new \
+            scp \
             docker-compose.yml \
             nginx.conf.template \
             "${TARGET_USER}@${TARGET_HOST}:${TARGET_DIRECTORY}/"
         - |
             ssh "${TARGET_USER}@${TARGET_HOST}" \
-            -oStrictHostKeyChecking=accept-new \
             "
             cd \"${TARGET_DIRECTORY}\" &&
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
@@ -112,23 +124,19 @@ deploy:staging:
 
 deploy:production:
     stage: deploy
-    image: alpine
+    extends:
+        - .ssh
     variables:
         TAG: 'latest'
     script:
-        - apk update && apk add openssh rsync
-        - eval $(ssh-agent -s)
-        - echo "$SSH_PRIVATE_KEY" | ssh-add -
-        - mkdir ~/.ssh
-        - chmod 700 ~/.ssh
+        - ssh-add <(echo "$SSH_PRIVATE_KEY")
         - |
-            scp -o StrictHostKeyChecking=accept-new \
+            scp \
             docker-compose.yml \
             nginx.conf.template \
             "${TARGET_USER}@${TARGET_HOST}:${TARGET_DIRECTORY}/"
         - |
             ssh "${TARGET_USER}@${TARGET_HOST}" \
-            -oStrictHostKeyChecking=accept-new \
             "
             cd \"${TARGET_DIRECTORY}\" &&
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&

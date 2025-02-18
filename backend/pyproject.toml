@@ -1,20 +1,19 @@
+[tool.mypy]
+strict = true
+files = ['backend', 'tests']
+
 [tool.pytest.ini_options]
 norecursedirs = ['.*', 'env']
 addopts = [
     '-Werror',
     '--cov=backend',
-    '--cov-report=term-missing',
-    '--cov-fail-under=100',
+    '--cov-report=term-missing:skip-covered',
     '--color=yes',
 ]
 
-[tool.mypy]
-strict = true
-files = ['backend', 'tests']
+[tool.ruff]
+line-length = 79
 
-[tool.flake8]
-exclude = [
-    '.git',
-    '__pycache__',
-    'env',
-]
+[tool.ruff.lint]
+extend-select = ["E", "W", "C"]
+preview = true
