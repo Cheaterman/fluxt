@@ -1,11 +1,9 @@
-version: '3.8'
-
 services:
     backend:
         image: fluxt/backend:${TAG}
         sysctls:
             net.core.somaxconn: 1024
-        restart: always
+        restart: unless-stopped
         depends_on:
             - db
         volumes:
@@ -22,8 +20,8 @@ services:
             TZ: Europe/Paris
 
     db:
-        image: postgres:16-alpine
-        restart: always
+        image: postgres:17-alpine
+        restart: unless-stopped
         volumes:
             - ./db_data:/var/lib/postgresql/data
         environment:
@@ -32,11 +30,11 @@ services:
 
     frontend:
         image: fluxt/frontend:${TAG}
-        restart: always
+        restart: unless-stopped
         volumes:
             - ./frontend_run:/run
         environment:
-            BASE_URI:
+            NUXT_APP_BASE_URL: $BASE_URI
             # 101: nginx gid
             SOCKET_GID: 101
             TZ: Europe/Paris

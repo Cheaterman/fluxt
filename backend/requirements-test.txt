@@ -1,7 +1,6 @@
+flask-httpauth-stubs
+mypy
 pytest
 pytest-cov
-flake8
-flake8-pyproject
-mypy
+ruff
 types-flask-migrate
-flask-httpauth-stubs

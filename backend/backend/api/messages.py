@@ -1,11 +1,14 @@
 from flask import abort, request
+from flask.typing import ResponseReturnValue
 
-from . import api, auth
-from backend.model import Message, db
+from backend.model import db
+from backend.model.message import Message
+from . import api
+from .auth import auth
 
 
 @api.get('/messages')
-def messages_list():
+def messages_list() -> ResponseReturnValue:
     return {'messages': [
         message.to_dict()
         for message in Message.query.order_by(Message.id)
@@ -13,8 +16,8 @@ def messages_list():
 
 
 @api.post('/messages')
-def messages_add():
-    json = request.json
+def messages_add() -> ResponseReturnValue:
+    json = request.get_json()
 
     if not json.get('text'):
         abort(400, 'expected_text')
@@ -25,14 +28,9 @@ def messages_add():
     return '', 201
 
 
-@api.delete('/messages/<int:id>')
+@api.delete('/messages/<message:message>')
 @auth.login_required
-def messages_delete(id):
-    message = db.session.get(Message, id)
-
-    if not message:
-        abort(404, 'invalid_message_id')
-
+def messages_delete(message: Message) -> ResponseReturnValue:
     db.session.delete(message)
     db.session.commit()
 

@@ -41,29 +41,22 @@ def test_client(app: Flask) -> FlaskClient:
 @pytest.fixture(scope='session')
 def db(app: Flask) -> collections.abc.Generator[SQLAlchemy, None, None]:
     with app.app_context():
+        # See https://github.com/sqlalchemy/sqlalchemy/issues/11163
         engine = db_.engine
-        session = db_.session
-
-        with engine.connect() as connection:
-            transaction = connection.begin()
-            engine.connect, connect = (  # type: ignore
-                lambda: connection,
-                engine.connect,
-            )
-            connection.close, close = (  # type: ignore
-                lambda: None,
-                connection.close,
-            )
-            session.commit, commit = (  # type: ignore
-                session.flush,
-                session.commit,
-            )
-            flask_migrate.upgrade()
+        connection = engine.connect()
+        transaction = connection.begin()
+        # pylint: disable=protected-access
+        db_.session = db_._make_scoped_session({
+            'bind': connection,
+            'join_transaction_mode': 'create_savepoint',
+        })
+        # XXX: Maybe we can avoid monkeypatching here somehow
+        db_.session.commit = db_.session.flush  # type: ignore
+        flask_migrate.upgrade()
+        try:
             yield db_
+        finally:
             transaction.rollback()
-            engine.connect = connect  # type: ignore
-            connection.close = close  # type: ignore
-            session.commit = commit  # type: ignore
 
 
 @pytest.fixture(autouse=True)
@@ -75,5 +68,7 @@ def db_session(app: Flask, db: SQLAlchemy) -> collections.abc.Generator[
     session = db.session
 
     with session.begin_nested() as transaction:
-        yield session
-        transaction.rollback()
+        try:
+            yield session
+        finally:
+            transaction.rollback()

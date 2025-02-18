@@ -10,10 +10,15 @@ COPY . /home/node
 
 WORKDIR /home/node
 
-RUN sh -c " \
+RUN \
+    apk add --no-cache --virtual .build-deps \
+        git \
+    && \
+    sh -c " \
         npm install -g pnpm && \
         pnpm install && \
         pnpm build \
-    "
+    " && \
+    apk del --no-cache .build-deps
 
 CMD ["node", ".output/server/index.mjs"]
