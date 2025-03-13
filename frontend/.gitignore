@@ -9,6 +9,9 @@ dist
 # Node dependencies
 node_modules
 
+# pnpm store
+.pnpm-store
+
 # Logs
 logs
 *.log

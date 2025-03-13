@@ -76,9 +76,8 @@ release:
         - docker tag $CI_REGISTRY_IMAGE/backend:$TAG $CI_REGISTRY_IMAGE/backend:latest
         - docker tag $CI_REGISTRY_IMAGE/frontend:$TAG $CI_REGISTRY_IMAGE/frontend:latest
         - TAG=latest docker compose push
-    only:
-        refs:
-            - main
+    rules:
+        - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 deploy:staging:
     stage: deploy
@@ -117,10 +116,9 @@ deploy:staging:
     environment:
         name: staging
         url: $STAGING_URL
-    only:
-        refs:
-            - staging
-            - main
+    rules:
+        - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+        - if: $CI_COMMIT_BRANCH == "staging"
 
 deploy:production:
     stage: deploy
@@ -157,6 +155,5 @@ deploy:production:
         name: production
         url: $PRODUCTION_URL
     when: manual
-    only:
-        refs:
-            - main
+    rules:
+        - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

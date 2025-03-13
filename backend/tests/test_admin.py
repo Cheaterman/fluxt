@@ -12,16 +12,15 @@ def admin_password(app: Flask) -> str:
     return typing.cast(str, app.config['ADMIN_PASSWORD'])
 
 
-@pytest.fixture
-def admin_session(test_client: FlaskClient) -> None:
-    with test_client.session_transaction() as session:
-        session['admin'] = True
-
-
-def test_config_missing_password(app: Flask) -> None:
+def test_config_missing_password(
+    test_client: FlaskClient,
+    app: Flask,
+    admin_password: str,
+) -> None:
     app.config['ADMIN_PASSWORD'] = ''
-    # TODO: Check that admin CANNOT login with empty password
-    assert False
+    response = test_client.get('/auth', auth=('admin', admin_password))
+    assert response.status_code == 401
+    assert response.get_json()['message'] == 'unauthorized'
 
 
 def test_no_credentials(test_client: FlaskClient) -> None:
@@ -55,8 +54,9 @@ def test_valid(test_client: FlaskClient, admin_password: str) -> None:
         response = test_client.get('/auth', auth=('admin', admin_password))
         assert response.status_code == 200
         assert response.get_json() == {
-            'id': None,
-            'roles': [Role.ADMINISTRATOR.value],
+            'id': '',
+            'email': 'admin',
+            'role': Role.ADMINISTRATOR.value,
         }
         assert session.get('admin') is True
 
@@ -65,8 +65,9 @@ def test_cookie(test_client: FlaskClient, admin_session: None) -> None:
     response = test_client.get('/auth')
     assert response.status_code == 200
     assert response.get_json() == {
-        'id': None,
-        'roles': [Role.ADMINISTRATOR.value],
+        'id': '',
+        'email': 'admin',
+        'role': Role.ADMINISTRATOR.value,
     }
 
 

@@ -10,5 +10,3 @@ db = SQLAlchemy(metadata=MetaData(naming_convention={
     'pk': 'pk_%(table_name)s'
 }))
 migrate = Migrate()
-
-from .message import Message  # noqa: F401, E402

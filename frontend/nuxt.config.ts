@@ -1,9 +1,12 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  devtools: { enabled: true },
-  nitro: {
-    routeRules: {
-      '/api/**': { proxy: 'http://proxy:80/api/**' },
+  icon: {
+    localApiEndpoint: '/_nuxt_icon_api',
+  },
+  modules: ['@nuxt/ui'],
+  vite: {
+    server: {
+      allowedHosts: ['frontend'],
     },
   },
 })

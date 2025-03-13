@@ -4,6 +4,7 @@ events {
 
 http {
     server {
+        client_max_body_size 10M;
         listen 0.0.0.0:80;
         listen unix:/run/nginx.sock;
         location $BASE_URI/api {
@@ -13,9 +14,10 @@ http {
             include uwsgi_params;
         }
         location $BASE_URI/ {
-            proxy_pass http://unix:/frontend_run/nuxt.sock;
+            proxy_pass http://frontend:3000;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "Upgrade";
+            proxy_read_timeout 3600s;
         }
     }
 }

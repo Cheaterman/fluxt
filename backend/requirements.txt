@@ -1,6 +1,12 @@
+bcrypt
 flask
+flask-emails
 flask-httpauth
+flask-marshmallow
+flask-marshmallow-openapi==0.6.4
 flask-migrate
 flask-sqlalchemy
+marshmallow
+marshmallow-sqlalchemy
 psycopg2-binary
 python-dotenv

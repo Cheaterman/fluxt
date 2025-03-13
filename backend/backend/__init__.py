@@ -2,7 +2,7 @@ from flask import Flask
 from flask_marshmallow_openapi import OpenAPISettings, OpenAPI  # type: ignore
 
 
-def create_app(config=None):
+def create_app(config: dict[str, str] | None = None) -> Flask:
     app = Flask(__name__)
     app.config.from_pyfile('config.py')
 
@@ -10,8 +10,13 @@ def create_app(config=None):
         app.config.from_mapping(config)
 
     from .model import db, migrate
+    from .model.message import MessageConverter
+    from .model.user import UserConverter
     db.init_app(app)
     migrate.init_app(app, db)
+
+    app.url_map.converters['message'] = MessageConverter
+    app.url_map.converters['user'] = UserConverter
 
     # See https://github.com/marshmallow-code/apispec/issues/444
     import warnings
