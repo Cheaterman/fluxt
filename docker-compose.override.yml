@@ -1,22 +1,21 @@
 services:
-    backend:
-        build: backend
-        volumes:
-            - ./backend:/code
-        environment:
-            UWSGI_PY_AUTORELOAD: 1
+  backend:
+    build: backend
+    volumes:
+      - ./backend:/code
+    environment:
+      UWSGI_PY_AUTORELOAD: 1
 
-    db:
-        ports:
-            - '127.0.0.1:5432:5432'
+  db:
+    ports:
+      - '127.0.0.1:5432:5432'
 
-    frontend:
-        build: frontend
-        volumes:
-            - ./frontend:/home/node
-        command: sh -c '
-                pnpm install &&
-                pnpm dev
-            '
-
-# vim: se sw=4 sts=4 et:
+  frontend:
+    build: frontend
+    volumes:
+      - ./frontend:/home/node
+    command: >
+      sh -c '
+        pnpm install &&
+        pnpm dev
+      '

@@ -1,63 +1,61 @@
 services:
-    backend:
-        image: fluxt/backend:${TAG}
-        sysctls:
-            net.core.somaxconn: 1024
-        restart: unless-stopped
-        depends_on:
-            - db
-        volumes:
-            - ./backend_run:/run
-        environment:
-            SECRET_KEY:
-            ADMIN_PASSWORD:
-            DB_HOST:
-            DB_PASSWORD:
-            SCRIPT_NAME: $BASE_URI/api
-            WSGI_MODULE: backend:create_app()
-            # 101: nginx gid
-            WSGI_SOCKET_GID: 101
-            TZ: Europe/Paris
+  backend:
+    image: fluxt/backend:${TAG}
+    sysctls:
+      net.core.somaxconn: 1024
+    restart: unless-stopped
+    depends_on:
+      - db
+    volumes:
+      - ./backend_run:/run
+    environment:
+      SECRET_KEY:
+      ADMIN_PASSWORD:
+      DB_HOST:
+      DB_PASSWORD:
+      SCRIPT_NAME: $BASE_URI/api
+      WSGI_MODULE: backend:create_app()
+      # 101: nginx gid
+      WSGI_SOCKET_GID: 101
+      TZ: Europe/Paris
 
-    db:
-        image: postgres:17-alpine
-        restart: unless-stopped
-        volumes:
-            - ./db_data:/var/lib/postgresql/data
-        environment:
-            POSTGRES_PASSWORD: $DB_PASSWORD
-            TZ: Europe/Paris
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: $DB_PASSWORD
+      TZ: Europe/Paris
 
-    frontend:
-        image: fluxt/frontend:${TAG}
-        restart: unless-stopped
-        volumes:
-            - ./frontend_run:/run
-        environment:
-            NUXT_APP_BASE_URL: $BASE_URI
-            # 101: nginx gid
-            SOCKET_GID: 101
-            TZ: Europe/Paris
+  frontend:
+    image: fluxt/frontend:${TAG}
+    restart: unless-stopped
+    volumes:
+      - ./frontend_run:/run
+    environment:
+      NUXT_APP_BASE_URL: $BASE_URI
+      # 101: nginx gid
+      SOCKET_GID: 101
+      TZ: Europe/Paris
 
-    proxy:
-        image: nginx
-        depends_on:
-            - backend
-            - frontend
-        restart: always
-        command: >
-            sh -c '
-                envsubst \$$BASE_URI < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf &&
-                rm -f /run/nginx.* &&
-                exec /docker-entrypoint.sh nginx -g "daemon off;"
-            '
-        volumes:
-            - ./nginx.conf.template:/etc/nginx/nginx.conf.template:ro
-            - ./proxy_run:/run
-            - ./backend_run:/backend_run
-            - ./frontend_run:/frontend_run
-        environment:
-            BASE_URI:
-            TZ: Europe/Paris
-
-# vim: se sw=4 sts=4 et:
+  proxy:
+    image: nginx
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+    command: >
+      sh -c '
+        envsubst \$$BASE_URI < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf &&
+        rm -f /run/nginx.* &&
+        exec /docker-entrypoint.sh nginx -g "daemon off;"
+      '
+    volumes:
+      - ./nginx.conf.template:/etc/nginx/nginx.conf.template:ro
+      - ./proxy_run:/run
+      - ./backend_run:/backend_run
+      - ./frontend_run:/frontend_run
+    environment:
+      BASE_URI:
+      TZ: Europe/Paris
