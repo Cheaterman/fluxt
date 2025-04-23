@@ -5,6 +5,7 @@ services:
       - ./backend:/code
     environment:
       UWSGI_PY_AUTORELOAD: 1
+      ENABLE_DOCS: 1
 
   db:
     ports:

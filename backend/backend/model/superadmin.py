@@ -1,20 +1,23 @@
 from __future__ import annotations
 
-import typing
+from typing import Self
 
 from flask import current_app, session
 
-from backend.api.auth import AuthInfo, RoleValue
 from .user import Role
 
 
-class Admin:
+class SuperAdmin:
+    email = 'admin'
+    first_name = 'Admin'
+    last_name = ''
+
     @classmethod
-    def auth(cls, email: str, password: str) -> Admin | None:
+    def auth(cls, email: str, password: str) -> Self | None:
         if session.get('admin'):
             return cls()
 
-        admin = cls.from_credentials(email, password)
+        admin: Self | None = cls.from_credentials(email, password)
 
         if admin:
             session['admin'] = True
@@ -28,16 +31,21 @@ class Admin:
     def get_auth_info(self) -> AuthInfo:
         return {
             'id': '',
-            'email': 'admin',
-            'role': typing.cast(RoleValue, self.get_role().value),
+            'email': self.email,
+            'role': self.get_role(),
+            'first_name': self.first_name,
+            'last_name': self.last_name,
         }
 
     @classmethod
-    def from_credentials(cls, email: str, password: str) -> Admin | None:
+    def from_credentials(cls, email: str, password: str) -> Self | None:
         if (
-            email == 'admin'
+            email == cls.email
             and password == current_app.config['ADMIN_PASSWORD']
         ):
             return cls()
 
         return None
+
+
+from backend.api.auth import AuthInfo  # noqa: E402

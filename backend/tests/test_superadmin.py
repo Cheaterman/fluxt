@@ -57,6 +57,8 @@ def test_valid(test_client: FlaskClient, admin_password: str) -> None:
             'id': '',
             'email': 'admin',
             'role': Role.ADMINISTRATOR.value,
+            'first_name': 'Admin',
+            'last_name': '',
         }
         assert session.get('admin') is True
 
@@ -68,6 +70,8 @@ def test_cookie(test_client: FlaskClient, admin_session: None) -> None:
         'id': '',
         'email': 'admin',
         'role': Role.ADMINISTRATOR.value,
+        'first_name': 'Admin',
+        'last_name': '',
     }
 
 

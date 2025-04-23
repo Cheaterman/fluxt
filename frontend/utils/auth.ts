@@ -1,14 +1,15 @@
-const { $api } = useNuxtApp()
-
 export async function login(
-  { username, password }:
-  { username: string, password: string }
+  { username, password, rememberMe }:
+  { username: string, password: string, rememberMe: boolean }
 ) {
-  return $api<''>('/auth', { headers: {
+  const { $api } = useNuxtApp()
+  return $api<AuthInfo>('/auth', { headers: {
     'Authorization': 'Basic ' + btoa(`${username}:${password}`),
+    'Fluxt-Remember-Me': rememberMe.toString(),
   }})
 }
 
 export async function logout() {
+  const { $api } = useNuxtApp()
   return $api<''>('/deauth')
 }

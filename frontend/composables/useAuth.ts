@@ -1,12 +1,4 @@
-export type RoleValue =
-  | 'administrator'
-  | 'user'
-
-export interface AuthInfo {
-  id: string
-  name: string
-  role: RoleValue
-}
+export type AuthInfo = Omit<User, 'creation_date'>
 
 export default () => {
   return useAPI<AuthInfo>('/auth')

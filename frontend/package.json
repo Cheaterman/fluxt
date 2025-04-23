@@ -12,9 +12,12 @@
   "devDependencies": {
     "@nuxt/ui": "^2.21.1",
     "@vue/typescript-plugin": "^2.2.8",
-    "nuxt": "^3.16.0",
-    "typescript": "^5.8.2",
+    "nuxt": "^3.16.2",
+    "typescript": "^5.8.3",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
+  },
+  "dependencies": {
+    "zod": "^3.24.2"
   }
 }

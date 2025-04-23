@@ -67,18 +67,6 @@ test:
             pytest -o cache_dir=/tmp/cache
             ' | docker compose run --rm backend sh
 
-release:
-    stage: release
-    extends:
-        - .docker
-    script:
-        - docker compose pull
-        - docker tag $CI_REGISTRY_IMAGE/backend:$TAG $CI_REGISTRY_IMAGE/backend:latest
-        - docker tag $CI_REGISTRY_IMAGE/frontend:$TAG $CI_REGISTRY_IMAGE/frontend:latest
-        - TAG=latest docker compose push
-    rules:
-        - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-
 deploy:staging:
     stage: deploy
     extends:
@@ -124,8 +112,6 @@ deploy:production:
     stage: deploy
     extends:
         - .ssh
-    variables:
-        TAG: 'latest'
     script:
         - ssh-add <(echo "$SSH_PRIVATE_KEY")
         - |

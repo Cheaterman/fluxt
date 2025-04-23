@@ -9,4 +9,5 @@ export default defineNuxtConfig({
       allowedHosts: ['frontend'],
     },
   },
+  compatibilityDate: '2025-04-01',
 })

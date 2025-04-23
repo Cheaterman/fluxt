@@ -24,6 +24,7 @@ def load_dotenv() -> None:
 def app() -> collections.abc.Generator[Flask, None, None]:
     app = create_app({
         'TESTING': 'True',
+        'STREAM_REFRESH_INTERVAL': 0,
         # Needed for redirecting to Nuxt
         'APPLICATION_ROOT': os.environ.get('SCRIPT_NAME', '/api/'),
         'EMAIL_HOST': 'localhost',

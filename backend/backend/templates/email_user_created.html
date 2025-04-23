@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- TODO: "if you can't see this email properly, click here"? -->
+<h1>
+  Account creation
+</h1>
+<p>
+  Hello {{ user.first_name or user.last_name }},<br>
+  <br>
+  Your account was successfully created.<br>
+  <br>
+  Click the following link to set your password and access the platform.<br>
+  <br>
+  <a href="{{ url }}">
+    Set my password
+  </a>
+</p>
+{% endblock %}

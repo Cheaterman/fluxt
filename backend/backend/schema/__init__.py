@@ -9,4 +9,4 @@ class EmptySchema(Schema):
 
 
 class CreateSchema(Schema):
-    id = fields.Str()
+    id = fields.String()
