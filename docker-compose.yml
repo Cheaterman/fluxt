@@ -13,6 +13,12 @@ services:
       ADMIN_PASSWORD:
       DB_HOST:
       DB_PASSWORD:
+      EMAIL_HOST:
+      EMAIL_PORT:
+      EMAIL_HOST_USER:
+      EMAIL_HOST_PASSWORD:
+      EMAIL_USE_TLS:
+      EMAIL_USE_SSL:
       SCRIPT_NAME: $BASE_URI/api
       WSGI_MODULE: backend:create_app()
       # 101: nginx gid

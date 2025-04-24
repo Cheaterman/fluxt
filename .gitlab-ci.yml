@@ -6,7 +6,7 @@ stages:
 
 variables:
     DOCKER_TLS_CERTDIR: '/certs'
-    TAG: $CI_COMMIT_REF_SLUG
+    TAG: $CI_COMMIT_SHA
     SSH_PRIVATE_KEY:
         description: 'Private SSH key for a given deployment environment.'
     TARGET_USER:
