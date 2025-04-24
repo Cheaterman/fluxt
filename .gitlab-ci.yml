@@ -1,145 +1,145 @@
 stages:
-    - build
-    - test
-    - release
-    - deploy
+  - build
+  - test
+  - release
+  - deploy
 
 variables:
-    DOCKER_TLS_CERTDIR: '/certs'
-    TAG: $CI_COMMIT_SHA
-    SSH_PRIVATE_KEY:
-        description: 'Private SSH key for a given deployment environment.'
-    TARGET_USER:
-        description: 'User name for a given deployment environment.'
-    TARGET_HOST:
-        description: 'Host for a given deployment environment.'
-    TARGET_DIRECTORY:
-        description: 'Absolute path to target folder for a given deployment environment.'
-    STAGING_URL:
-        description: 'URL where the staging deployment can be seen.'
-    PRODUCTION_URL:
-        description: 'URL where the production deployment can be seen.'
+  DOCKER_TLS_CERTDIR: '/certs'
+  TAG: $CI_COMMIT_SHA
+  SSH_PRIVATE_KEY:
+    description: 'Private SSH key for a given deployment environment.'
+  TARGET_USER:
+    description: 'User name for a given deployment environment.'
+  TARGET_HOST:
+    description: 'Host for a given deployment environment.'
+  TARGET_DIRECTORY:
+    description: 'Absolute path to target folder for a given deployment environment.'
+  STAGING_URL:
+    description: 'URL where the staging deployment can be seen.'
+  PRODUCTION_URL:
+    description: 'URL where the production deployment can be seen.'
 
 services:
-    - docker:dind
+  - docker:dind
 
 .docker:
-    image: docker:27.4.1
-    before_script:
-        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  image: docker:27.4.1
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
 
 .ssh:
-    image: alpine:3.21.2
-    before_script:
-        - apk add openssh
-        - eval $(ssh-agent -s)
-        - mkdir -p ~/.ssh
-        - echo -e "Host *\n\tStrictHostKeyChecking accept-new\n" > ~/.ssh/config
+  image: alpine:3.21.2
+  before_script:
+    - apk add openssh
+    - eval $(ssh-agent -s)
+    - mkdir -p ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking accept-new\n" > ~/.ssh/config
 
 workflow:
-    rules:
-        - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-        - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
-          when: never
-        - if: $CI_COMMIT_BRANCH
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
 
 build:
-    stage: build
-    extends:
-        - .docker
-    script:
-        - docker compose build
-        - docker compose push
+  stage: build
+  extends:
+    - .docker
+  script:
+    - docker compose build
+    - docker compose push
 
 test:
-    stage: test
-    extends:
-        - .docker
-    script:
-        - docker compose pull backend
-        - docker compose up -d db
-        - |
-            echo '
-            pip install -r requirements-test.txt &&
-            ruff check && \
-            mypy && \
-            COVERAGE_FILE=/tmp/coverage \
-            pytest -o cache_dir=/tmp/cache
-            ' | docker compose run --rm backend sh
+  stage: test
+  extends:
+    - .docker
+  script:
+    - docker compose pull backend
+    - docker compose up -d db
+    - |
+      echo '
+      pip install -r requirements-test.txt &&
+      ruff check && \
+      mypy && \
+      COVERAGE_FILE=/tmp/coverage \
+      pytest -o cache_dir=/tmp/cache
+      ' | docker compose run --rm backend sh
 
 deploy:staging:
-    stage: deploy
-    extends:
-        - .ssh
-    script:
-        - ssh-add <(echo "$SSH_PRIVATE_KEY")
-        - |
-            scp \
-            docker-compose.yml \
-            nginx.conf.template \
-            "${TARGET_USER}@${TARGET_HOST}:${TARGET_DIRECTORY}/"
-        - |
-            ssh "${TARGET_USER}@${TARGET_HOST}" \
-            "
-            cd \"${TARGET_DIRECTORY}\" &&
-            docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
-            export TAG=$TAG CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE &&
-            docker compose pull &&
-            rm -rf ~/.docker &&
-            docker compose \\
-                up \\
-                --renew-anon-volumes \\
-                --no-deps \\
-                --detach \\
-            &&
-            echo 'flask db upgrade' \\
-            | docker compose run --rm backend sh &&
-            echo '
-            pip install -r requirements-test.txt &&
-            COVERAGE_FILE=/tmp/coverage \\
-            pytest -o cache_dir=/tmp/cache
-            ' | docker compose run --rm backend sh &&
-            docker image prune -f
-            "
-    environment:
-        name: staging
-        url: $STAGING_URL
-    rules:
-        - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-        - if: $CI_COMMIT_BRANCH == "staging"
+  stage: deploy
+  extends:
+    - .ssh
+  script:
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - |
+      scp \
+      docker-compose.yml \
+      nginx.conf.template \
+      "${TARGET_USER}@${TARGET_HOST}:${TARGET_DIRECTORY}/"
+    - |
+      ssh "${TARGET_USER}@${TARGET_HOST}" \
+      "
+      cd \"${TARGET_DIRECTORY}\" &&
+      docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
+      export TAG=$TAG CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE &&
+      docker compose pull &&
+      rm -rf ~/.docker &&
+      docker compose \\
+        up \\
+        --renew-anon-volumes \\
+        --no-deps \\
+        --detach \\
+      &&
+      echo 'flask db upgrade' \\
+      | docker compose run --rm backend sh &&
+      echo '
+      pip install -r requirements-test.txt &&
+      COVERAGE_FILE=/tmp/coverage \\
+      pytest -o cache_dir=/tmp/cache
+      ' | docker compose run --rm backend sh &&
+      docker image prune -f
+      "
+  environment:
+    name: staging
+    url: $STAGING_URL
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == "staging"
 
 deploy:production:
-    stage: deploy
-    extends:
-        - .ssh
-    script:
-        - ssh-add <(echo "$SSH_PRIVATE_KEY")
-        - |
-            scp \
-            docker-compose.yml \
-            nginx.conf.template \
-            "${TARGET_USER}@${TARGET_HOST}:${TARGET_DIRECTORY}/"
-        - |
-            ssh "${TARGET_USER}@${TARGET_HOST}" \
-            "
-            cd \"${TARGET_DIRECTORY}\" &&
-            docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
-            export TAG=$TAG CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE &&
-            docker compose pull &&
-            rm -rf ~/.docker &&
-            docker compose \\
-                up \\
-                --renew-anon-volumes \\
-                --no-deps \\
-                --detach \\
-            &&
-            echo 'flask db upgrade' \\
-            | docker compose run --rm backend sh &&
-            docker image prune -f
-            "
-    environment:
-        name: production
-        url: $PRODUCTION_URL
-    when: manual
-    rules:
-        - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  stage: deploy
+  extends:
+    - .ssh
+  script:
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - |
+      scp \
+      docker-compose.yml \
+      nginx.conf.template \
+      "${TARGET_USER}@${TARGET_HOST}:${TARGET_DIRECTORY}/"
+    - |
+      ssh "${TARGET_USER}@${TARGET_HOST}" \
+      "
+      cd \"${TARGET_DIRECTORY}\" &&
+      docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
+      export TAG=$TAG CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE &&
+      docker compose pull &&
+      rm -rf ~/.docker &&
+      docker compose \\
+        up \\
+        --renew-anon-volumes \\
+        --no-deps \\
+        --detach \\
+      &&
+      echo 'flask db upgrade' \\
+      | docker compose run --rm backend sh &&
+      docker image prune -f
+      "
+  environment:
+    name: production
+    url: $PRODUCTION_URL
+  when: manual
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
