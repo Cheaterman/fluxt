@@ -11,3 +11,4 @@ marshmallow
 marshmallow-sqlalchemy
 psycopg2-binary
 python-dotenv
+python-magic

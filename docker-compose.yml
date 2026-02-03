@@ -8,6 +8,7 @@ services:
       - db
     volumes:
       - ./backend_run:/run
+      - ./files:/code/files
     environment:
       SECRET_KEY:
       ADMIN_PASSWORD:

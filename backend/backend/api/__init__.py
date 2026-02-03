@@ -7,6 +7,7 @@ from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 api = Blueprint('api', __name__)
 
 from backend.model.superadmin import SuperAdmin  # noqa: E402
+from backend.model.file import FileConverter  # noqa: E402
 from backend.model.user import Role, User, UserConverter  # noqa: E402
 from .auth import Authable, auth  # noqa: E402
 
@@ -18,6 +19,7 @@ error_messages = {
 
 @api.record_once
 def register_url_converters(state: BlueprintSetupState) -> None:
+    state.app.url_map.converters['file'] = FileConverter
     state.app.url_map.converters['user'] = UserConverter
 
 
@@ -74,5 +76,6 @@ def get_user_roles(user: Authable) -> list[Role]:
 
 
 from . import (  # noqa: F401, E402
+    file as _file,
     user as _user,
 )

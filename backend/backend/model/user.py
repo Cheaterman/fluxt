@@ -16,9 +16,9 @@ from flask import (
 )
 from flask_emails import Message  # type: ignore[import-untyped]
 from itsdangerous import BadSignature, URLSafeSerializer
-from sqlalchemy import func, text
+from sqlalchemy import Function, func, text
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from werkzeug.routing import BaseConverter
 
 from backend import nuxtify
@@ -42,16 +42,18 @@ class User(Model):
     role: Mapped[Role]
     enabled: Mapped[bool] = mapped_column(server_default=text('TRUE'))
 
+    files: Mapped[list[File]] = relationship(back_populates='author')
+
     @hybrid_property
-    def email(self):
+    def email(self) -> str:
         return self._email
 
-    @email.setter  # type: ignore[no-redef]
-    def email(self, value: str):
+    @email.setter
+    def email_setter(self, value: str) -> None:
         self._email = value.lower()
 
-    @email.expression  # type: ignore[no-redef]
-    def email(cls):
+    @email.expression
+    def email_expression(cls) -> Function[str]:
         return func.lower(cls._email)
 
     @classmethod
@@ -192,3 +194,4 @@ class UserConverter(BaseConverter):
 
 
 from backend.api.auth import AuthInfo  # noqa: E402
+from .file import File  # noqa: E402
