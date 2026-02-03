@@ -17,7 +17,7 @@ from .auth import auth
 @api.post('/users')
 @auth.login_required(role=Role.ADMINISTRATOR)
 def create_user() -> ResponseReturnValue:
-    user = UserSchema(exclude=['id', 'creation_date']).load(request.json)
+    user = UserSchema().load(request.json)
 
     User.check_duplicate(user)
 

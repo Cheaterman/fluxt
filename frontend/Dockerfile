@@ -2,7 +2,6 @@ FROM node:lts-alpine
 
 ARG NITRO_PRESET=node-cluster
 
-COPY docker-entrypoint.sh /usr/local/bin
 COPY . /home/node
 
 WORKDIR /home/node

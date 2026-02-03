@@ -41,8 +41,6 @@ services:
       - ./frontend_run:/run
     environment:
       NUXT_APP_BASE_URL: $BASE_URI
-      # 101: nginx gid
-      SOCKET_GID: 101
       TZ: Europe/Paris
 
   proxy:

@@ -1,7 +1,6 @@
 stages:
   - build
   - test
-  - release
   - deploy
 
 variables:
@@ -21,7 +20,8 @@ variables:
     description: 'URL where the production deployment can be seen.'
 
 services:
-  - docker:dind
+  - name: docker:dind
+    alias: docker
 
 .docker:
   image: docker:27.4.1
