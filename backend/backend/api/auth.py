@@ -12,7 +12,6 @@ from backend import api as api_module
 from backend.model.user import Role
 from backend.schema import EmptySchema
 
-
 api = typing.cast(Blueprint, api_module.api)  # type: ignore
 auth = HTTPBasicAuth(scheme='BasicAPI')
 

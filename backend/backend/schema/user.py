@@ -2,6 +2,7 @@ from marshmallow import fields
 from marshmallow.validate import Length, OneOf
 
 from backend.model.user import Role, User
+
 from . import ma
 
 
@@ -9,7 +10,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):  # type: ignore[name-defined,misc]
     class Meta:
         model = User
         load_instance = True
-        exclude = ['password', '_email']
+        exclude = ('password', '_email')
 
     id = fields.String(dump_only=True)
     creation_date = fields.DateTime(dump_only=True)

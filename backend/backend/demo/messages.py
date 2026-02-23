@@ -1,5 +1,6 @@
 import datetime
-from typing import Any, Generator, cast
+from collections.abc import Generator
+from typing import cast
 
 import gevent
 from flask import Response, current_app, request, stream_with_context
@@ -12,8 +13,9 @@ from backend.api.auth import auth
 from backend.model import db
 from backend.model.superadmin import SuperAdmin
 from backend.model.user import Role, User
-from .model.message import Message
+
 from . import api
+from .model.message import Message
 
 
 def serialize_author(message: Message) -> str:
@@ -38,7 +40,7 @@ def messages_stream() -> ResponseReturnValue:
     schema = MessageSchema()
 
     def stream() -> Generator[str, None, None]:
-        last_date = datetime.datetime.min
+        last_date = datetime.datetime.min.replace(tzinfo=datetime.UTC)
 
         while True:
             for message in db.session.scalars(
@@ -65,9 +67,7 @@ class CreateMessageSchema(Schema):
 @api.post('/messages')
 @auth.login_required
 def messages_add() -> ResponseReturnValue:
-    data = CreateMessageSchema().load(
-        cast(dict[str, Any], request.json)
-    )
+    data = cast(dict[str, str], CreateMessageSchema().load(request.json))
 
     message = Message()
     message.text = data['text']

@@ -1,4 +1,7 @@
-from flask import Blueprint, Request, request, session
+from typing import NoReturn, Self
+
+from flask import Blueprint, request, session
+from flask import Request as FlaskRequest
 from flask.blueprints import BlueprintSetupState
 from flask.typing import ResponseReturnValue
 from marshmallow import ValidationError
@@ -6,15 +9,21 @@ from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
 api = Blueprint('api', __name__)
 
-from backend.model.superadmin import SuperAdmin  # noqa: E402
 from backend.model.file import FileConverter  # noqa: E402
+from backend.model.superadmin import SuperAdmin  # noqa: E402
 from backend.model.user import Role, User, UserConverter  # noqa: E402
+
 from .auth import Authable, auth  # noqa: E402
 
 error_messages = {
     401: 'unauthorized',
     403: 'forbidden',
 }
+
+
+class Request(FlaskRequest):
+    def on_json_loading_failed(self: Self, e: ValueError | None) -> NoReturn:
+        raise BadRequest('expected_json')
 
 
 @api.record_once
@@ -27,9 +36,6 @@ def raise_expected_json(request: Request, error: BadRequest) -> BadRequest:
     raise BadRequest('expected_json')
 
 
-setattr(Request, 'on_json_loading_failed', raise_expected_json)
-
-
 @api.errorhandler(BadRequest)
 @api.errorhandler(Conflict)
 @api.errorhandler(Forbidden)  # Business logic 403, not RBAC
@@ -37,6 +43,7 @@ setattr(Request, 'on_json_loading_failed', raise_expected_json)
 def http_error(
     error: BadRequest | Conflict | Forbidden | NotFound,
 ) -> ResponseReturnValue:
+    assert error.code
     return {'message': error.description}, error.code
 
 
@@ -75,7 +82,5 @@ def get_user_roles(user: Authable) -> list[Role]:
     return [user.get_role()]
 
 
-from . import (  # noqa: F401, E402
-    file as _file,
-    user as _user,
-)
+from . import file as _file  # noqa: F401, E402
+from . import user as _user  # noqa: F401, E402

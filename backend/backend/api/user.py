@@ -9,6 +9,7 @@ from backend.model import db
 from backend.model.user import Role, User
 from backend.schema import CreateSchema, EmptySchema
 from backend.schema.user import UserSchema
+
 from . import api
 from .auth import auth
 

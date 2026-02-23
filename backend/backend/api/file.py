@@ -1,4 +1,4 @@
-import typing
+from typing import cast
 
 from flask import abort, request, send_file
 from flask.typing import ResponseReturnValue
@@ -6,6 +6,7 @@ from flask.typing import ResponseReturnValue
 from backend.model import db
 from backend.model.file import EXTENSIONS, File
 from backend.model.user import Role
+
 from . import api
 from .auth import Authable, auth
 
@@ -27,7 +28,7 @@ def upload_file() -> ResponseReturnValue:
 @api.delete('/files/<file:file>')
 @auth.login_required(role=(Role.ADMINISTRATOR, Role.USER))
 def delete_file(file: File) -> ResponseReturnValue:
-    current_user = typing.cast(Authable, auth.current_user())
+    current_user = cast(Authable, auth.current_user())
 
     if (
         current_user.get_role() is Role.USER

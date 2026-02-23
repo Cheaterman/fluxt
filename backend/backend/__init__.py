@@ -1,5 +1,5 @@
 from flask import Flask
-from flask_marshmallow_openapi import OpenAPISettings, OpenAPI  # type: ignore
+from flask_marshmallow_openapi import OpenAPI, OpenAPISettings  # type: ignore
 
 
 def nuxtify(url: str) -> str:
@@ -25,8 +25,9 @@ def create_app(config: dict[str, str | float] | None = None) -> Flask:
         message="Multiple schemas resolved to the name "
     )
 
-    from .api import api
+    from .api import Request, api
     app.register_blueprint(api)
+    app.request_class = Request
 
     # XXX: Remove this for production
     from .demo import api

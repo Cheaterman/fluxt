@@ -13,11 +13,11 @@ class SuperAdmin:
     last_name = ''
 
     @classmethod
-    def auth(cls, email: str, password: str) -> Self | None:
+    def auth(cls, username: str, password: str) -> Self | None:
         if session.get('admin'):
             return cls()
 
-        admin: Self | None = cls.from_credentials(email, password)
+        admin: Self | None = cls.from_credentials(username, password)
 
         if admin:
             session['admin'] = True
@@ -38,9 +38,9 @@ class SuperAdmin:
         }
 
     @classmethod
-    def from_credentials(cls, email: str, password: str) -> Self | None:
+    def from_credentials(cls, username: str, password: str) -> Self | None:
         if (
-            email == cls.email
+            username == cls.email
             and password == current_app.config['ADMIN_PASSWORD']
         ):
             return cls()

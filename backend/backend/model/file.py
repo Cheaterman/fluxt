@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import datetime
 import pathlib
 import uuid
@@ -20,7 +21,6 @@ from werkzeug.routing import BaseConverter
 from werkzeug.utils import secure_filename
 
 from . import db
-
 
 EXTENSIONS = {
     'image/png': 'png',

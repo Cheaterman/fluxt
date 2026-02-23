@@ -10,9 +10,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_sqlalchemy.session import Session
 from sqlalchemy.orm import scoped_session
 
-from tests.auth import admin_session, role, user_session  # noqa: F401
 from backend import create_app
 from backend.model import db as db_
+from tests.auth import admin_session, role, user_session  # noqa: F401
 
 
 @pytest.fixture(scope='session', autouse=True)

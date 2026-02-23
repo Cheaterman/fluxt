@@ -22,6 +22,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from werkzeug.routing import BaseConverter
 
 from backend import nuxtify
+
 from . import Model, db
 
 
@@ -194,4 +195,5 @@ class UserConverter(BaseConverter):
 
 
 from backend.api.auth import AuthInfo  # noqa: E402
+
 from .file import File  # noqa: E402
