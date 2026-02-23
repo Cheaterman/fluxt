@@ -1,4 +1,4 @@
-from typing import Any, cast
+from typing import cast
 
 from flask import abort, jsonify, request
 from flask.typing import ResponseReturnValue
@@ -89,9 +89,9 @@ class PasswordSchema(Schema):
 )
 @api.post('/set-password/<token>')
 def set_password(token: str) -> ResponseReturnValue:
-    password = PasswordSchema().load(
-        cast(dict[str, Any], request.json)
-    )['password']
+    password = cast(dict[str, str], PasswordSchema().load(
+        request.json
+    ))['password']
     user = User.from_password_token(token)
 
     if not user:
@@ -124,9 +124,9 @@ def send_reset_password_email(email: str) -> ResponseReturnValue:
 )
 @api.post('/reset-password/<token>')
 def reset_password(token: str) -> ResponseReturnValue:
-    password = PasswordSchema().load(
-        cast(dict[str, Any], request.json)
-    )['password']
+    password = cast(dict[str, str], PasswordSchema().load(
+        request.json
+    ))['password']
     user = User.from_password_token(token)
 
     if not user:
