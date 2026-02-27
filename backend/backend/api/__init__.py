@@ -32,10 +32,6 @@ def register_url_converters(state: BlueprintSetupState) -> None:
     state.app.url_map.converters['user'] = UserConverter
 
 
-def raise_expected_json(request: Request, error: BadRequest) -> BadRequest:
-    raise BadRequest('expected_json')
-
-
 @api.errorhandler(BadRequest)
 @api.errorhandler(Conflict)
 @api.errorhandler(Forbidden)  # Business logic 403, not RBAC

@@ -1,8 +1,11 @@
 import json
 
 from flask.testing import FlaskClient
+from flask_sqlalchemy.session import Session
+from sqlalchemy.orm import scoped_session
 
 from backend.demo.model.message import Message
+from backend.model.user import User
 
 
 def test_messages_stream(
@@ -81,6 +84,22 @@ def test_messages_post_valid(
     assert data['text'] == 'Some text'
 
 
+def test_messages_post_assigns_author_for_regular_user(
+    test_client: FlaskClient,
+    user_session: None,
+    user: User,
+    db_session: scoped_session[Session],
+) -> None:
+    response = test_client.post('/messages', json={'text': 'User message'})
+    assert response.status_code == 201
+
+    message_id = response.get_json()['id']
+    message = db_session.get(Message, message_id)
+    assert message
+    assert message.author
+    assert message.author.id == user.id
+
+
 def test_messages_delete_valid(
     test_client: FlaskClient,
     admin_session: None,
@@ -94,3 +113,14 @@ def test_messages_delete_valid(
     assert response.status_code == 204
     assert response.data == b''
     assert Message.query.count() == before_count
+
+
+def test_messages_delete_missing(
+    test_client: FlaskClient,
+    admin_session: None,
+) -> None:
+    response = test_client.delete(
+        '/messages/00000000-0000-0000-0000-000000000000'
+    )
+    assert response.status_code == 404
+    assert response.get_json() == {'message': 'message_not_found'}

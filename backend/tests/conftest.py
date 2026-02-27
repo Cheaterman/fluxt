@@ -1,5 +1,6 @@
 import collections.abc
 import os
+from typing import TypedDict
 
 import dotenv
 import flask_migrate
@@ -12,7 +13,16 @@ from sqlalchemy.orm import scoped_session
 
 from backend import create_app
 from backend.model import db as db_
+from backend.model.user import Role, User
 from tests.auth import admin_session, role, user_session  # noqa: F401
+
+
+class CreateUserPayload(TypedDict):
+    email: str
+    first_name: str
+    last_name: str
+    role: str
+    enabled: bool
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -73,3 +83,51 @@ def db_session(app: Flask, db: SQLAlchemy) -> collections.abc.Generator[
             yield session
         finally:
             transaction.rollback()
+
+
+@pytest.fixture
+def create_user_payload() -> CreateUserPayload:
+    return {
+        'email': 'new-user@example.com',
+        'first_name': 'New',
+        'last_name': 'User',
+        'role': Role.USER.value,
+        'enabled': True,
+    }
+
+
+@pytest.fixture
+def user_password() -> str:
+    return 'user-password'
+
+
+@pytest.fixture
+def user(
+    db_session: scoped_session[Session],
+    user_password: str,
+    create_user_payload: CreateUserPayload,
+) -> User:
+    user = User()
+    user.email = create_user_payload['email']
+    user.first_name = create_user_payload['first_name']
+    user.last_name = create_user_payload['last_name']
+    user.role = Role(create_user_payload['role'])
+    user.enabled = create_user_payload['enabled']
+    user.set_password(user_password)
+    db_session.add(user)
+    db_session.flush()
+    return user
+
+
+@pytest.fixture
+def other_user(db_session: scoped_session[Session]) -> User:
+    user = User()
+    user.email = 'other-user@example.com'
+    user.first_name = 'Other'
+    user.last_name = 'User'
+    user.role = Role.USER
+    user.enabled = True
+    user.set_password('other-user-password')
+    db_session.add(user)
+    db_session.flush()
+    return user

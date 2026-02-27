@@ -49,22 +49,23 @@ class User(Model):
     def email(self) -> str:
         return self._email
 
-    @email.setter
-    def email_setter(self, value: str) -> None:
+    @email.inplace.setter
+    def _email_setter(self, value: str) -> None:
         self._email = value.lower()
 
-    @email.expression
-    def email_expression(cls) -> Function[str]:
+    @email.inplace.expression
+    @classmethod
+    def _email_expression(cls) -> Function[str]:
         return func.lower(cls._email)
 
     @classmethod
-    def auth(cls, email: str, password: str) -> Self | None:
+    def auth(cls, username: str, password: str) -> Self | None:
         user_id = session.get('user_id')
 
         if user_id:
             user = db.session.get(cls, user_id)
         else:
-            user = cls.from_credentials(email, password)
+            user = cls.from_credentials(username, password)
 
         if user and user.enabled:
             session['user_id'] = user.id

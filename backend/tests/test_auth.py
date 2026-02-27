@@ -81,3 +81,35 @@ def test_deauth(test_client: FlaskClient, admin_session: None) -> None:
         assert response.status_code == 204
         assert response.data == b''
         assert 'admin' not in session
+
+
+def test_remember_me_true(
+    test_client: FlaskClient,
+    app: Flask,
+) -> None:
+    app.config['ADMIN_PASSWORD'] = 'remember-password'
+    with test_client:
+        test_client.get('/auth')  # Create session
+        response = test_client.get(
+            '/auth',
+            auth=('admin', 'remember-password'),
+            headers={'Fluxt-Remember-Me': 'true'},
+        )
+        assert response.status_code == 200
+        assert session.permanent is True
+
+
+def test_remember_me_false(
+    test_client: FlaskClient,
+    app: Flask,
+) -> None:
+    app.config['ADMIN_PASSWORD'] = 'remember-password'
+    with test_client:
+        test_client.get('/auth')  # Create session
+        response = test_client.get(
+            '/auth',
+            auth=('admin', 'remember-password'),
+            headers={'Fluxt-Remember-Me': 'false'},
+        )
+        assert response.status_code == 200
+        assert session.permanent is False
