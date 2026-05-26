@@ -11,7 +11,7 @@ RUN \
         git \
     && \
     npm install -g pnpm && \
-    pnpm install --force && \
+    pnpm install && \
     pnpm build && \
     apk del --no-cache .build-deps
 

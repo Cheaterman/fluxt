@@ -1,6 +1,6 @@
 services:
   backend:
-    image: fluxt/backend:${TAG}
+    image: ${CI_REGISTRY_IMAGE}/backend:${TAG}
     sysctls:
       net.core.somaxconn: 1024
     restart: unless-stopped
@@ -20,11 +20,11 @@ services:
       EMAIL_HOST_PASSWORD:
       EMAIL_USE_TLS:
       EMAIL_USE_SSL:
-      SCRIPT_NAME: $BASE_URI/api
+      SCRIPT_NAME: ${BASE_URI}/api
       WSGI_MODULE: backend:create_app()
       # 101: nginx gid
       WSGI_SOCKET_GID: 101
-      TZ: Europe/Paris
+      TZ:
 
   db:
     image: postgres:17-alpine
@@ -33,16 +33,16 @@ services:
       - ./db_data:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: $DB_PASSWORD
-      TZ: Europe/Paris
+      TZ:
 
   frontend:
-    image: fluxt/frontend:${TAG}
+    image: ${CI_REGISTRY_IMAGE}/frontend:${TAG}
     restart: unless-stopped
     volumes:
       - ./frontend_run:/run
     environment:
-      NUXT_APP_BASE_URL: $BASE_URI
-      TZ: Europe/Paris
+      NUXT_APP_BASE_URL: ${BASE_URI}
+      TZ:
 
   proxy:
     image: nginx
@@ -63,4 +63,4 @@ services:
       - ./frontend_run:/frontend_run
     environment:
       BASE_URI:
-      TZ: Europe/Paris
+      TZ:
