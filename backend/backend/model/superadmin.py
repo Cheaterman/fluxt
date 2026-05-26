@@ -41,6 +41,7 @@ class SuperAdmin:
     def from_credentials(cls, username: str, password: str) -> Self | None:
         if (
             username == cls.email
+            and password
             and password == current_app.config['ADMIN_PASSWORD']
         ):
             return cls()

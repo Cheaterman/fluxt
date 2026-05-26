@@ -18,9 +18,14 @@ def test_config_missing_password(
     admin_password: str,
 ) -> None:
     app.config['ADMIN_PASSWORD'] = ''
-    response = test_client.get('/auth', auth=('admin', admin_password))
-    assert response.status_code == 401
-    assert response.get_json()['message'] == 'unauthorized'
+
+    try:
+        response = test_client.get('/auth', auth=('admin', ''))
+        assert response.status_code == 401
+        assert response.get_json()['message'] == 'unauthorized'
+
+    finally:
+        app.config['ADMIN_PASSWORD'] = admin_password
 
 
 def test_no_credentials(test_client: FlaskClient) -> None:
