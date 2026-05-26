@@ -11,6 +11,9 @@ addopts = [
     '--color=yes',
 ]
 
+[tool.coverage.run]
+concurrency = ['gevent']
+
 [tool.ruff]
 line-length = 79
 

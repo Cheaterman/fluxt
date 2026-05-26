@@ -99,6 +99,11 @@ def unlink_deleted_files(session: Session) -> None:
         file_path.unlink(missing_ok=True)
 
 
+@event.listens_for(Session, 'after_rollback')
+def clear_deleted_files(session: Session) -> None:
+    session.info.pop('deleted_file_paths', None)
+
+
 class FileConverter(BaseConverter):
     def to_python(self, value: str) -> File:
         file = db.session.query(File).filter_by(filename=value).one_or_none()
