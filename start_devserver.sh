@@ -9,7 +9,9 @@ uwsgi \
     --plugin http \
     --plugin router_http \
     --http :8080 \
-    --route '.* http:proxy_run/nginx.sock' \
+    --route '.* httpdumb:proxy_run/nginx.sock' \
+    --http-raw-body \
+    --offload-threads 4 \
     -z 3600 \
     --http-timeout 3600 \
     --workers 4 \

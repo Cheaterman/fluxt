@@ -4,8 +4,7 @@ COPY docker-entrypoint.sh /
 COPY . /code
 
 RUN \
-    apk update && \
-    apk add \
+    apk add --no-cache \
         libmagic \
     && \
     su uwsgi -c ' \

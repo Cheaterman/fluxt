@@ -3,20 +3,29 @@ events {
 }
 
 http {
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        '' '';
+    }
+
     server {
-        client_max_body_size 10M;
+        client_max_body_size $CLIENT_MAX_BODY_SIZE;
+
         listen 0.0.0.0:80;
         listen unix:/run/nginx.sock;
+
         location $BASE_URI/api {
             uwsgi_param SCRIPT_NAME $BASE_URI/api;
             uwsgi_pass unix:/backend_run/wsgi.sock;
             uwsgi_buffering off;
             include uwsgi_params;
         }
+
         location $BASE_URI/ {
-            proxy_pass http://frontend:3000;
+            proxy_pass http://unix:/frontend_run/nuxt.sock;
+            proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection "Upgrade";
+            proxy_set_header Connection $connection_upgrade;
             proxy_read_timeout 3600s;
         }
     }

@@ -1,18 +1,15 @@
-FROM node:lts-alpine
-
+FROM node:lts-alpine AS build
 ARG NITRO_PRESET=node-cluster
+WORKDIR /build
 
-COPY . /home/node
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+RUN corepack enable && pnpm install --frozen-lockfile
 
-WORKDIR /home/node
+COPY . .
+RUN pnpm build
 
-RUN \
-    apk add --no-cache --virtual .build-deps \
-        git \
-    && \
-    npm install -g pnpm && \
-    pnpm install && \
-    pnpm build && \
-    apk del --no-cache .build-deps
+FROM node:lts-alpine
+WORKDIR /app
+COPY --from=build /build/.output .output
 
 CMD ["node", ".output/server/index.mjs"]

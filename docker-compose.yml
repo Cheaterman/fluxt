@@ -38,10 +38,29 @@ services:
   frontend:
     image: ${CI_REGISTRY_IMAGE}/frontend:${TAG}
     restart: unless-stopped
+    command:
+      - sh
+      - -c
+      - |
+        rm -f /run/nuxt.sock
+
+        node .output/server/index.mjs &
+        node_pid=$$!
+
+        while [ ! -S /run/nuxt.sock ]; do
+          sleep .1
+        done
+
+        chgrp "$$NITRO_SOCKET_GID" /run/nuxt.sock
+        chmod 660 /run/nuxt.sock
+        wait "$$node_pid"
     volumes:
       - ./frontend_run:/run
     environment:
       NUXT_APP_BASE_URL: ${BASE_URI}
+      NITRO_UNIX_SOCKET: /run/nuxt.sock
+      # 101: nginx gid
+      NITRO_SOCKET_GID: 101
       TZ:
 
   proxy:
@@ -50,12 +69,15 @@ services:
       - backend
       - frontend
     restart: unless-stopped
-    command: >
-      sh -c '
-        envsubst \$$BASE_URI < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf &&
+    command:
+      - sh
+      - -c
+      - |
+        envsubst '$$BASE_URI $$CLIENT_MAX_BODY_SIZE' \
+          < /etc/nginx/nginx.conf.template \
+          > /etc/nginx/nginx.conf &&
         rm -f /run/nginx.* &&
-        exec /docker-entrypoint.sh nginx -g "daemon off;"
-      '
+        exec /docker-entrypoint.sh nginx -g 'daemon off;'
     volumes:
       - ./nginx.conf.template:/etc/nginx/nginx.conf.template:ro
       - ./proxy_run:/run
@@ -63,4 +85,5 @@ services:
       - ./frontend_run:/frontend_run
     environment:
       BASE_URI:
+      CLIENT_MAX_BODY_SIZE: 10M
       TZ:

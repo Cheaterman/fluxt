@@ -15,8 +15,22 @@ services:
     build: frontend
     volumes:
       - ./frontend:/home/node
-    command: >
-      sh -c '
-        pnpm install &&
-        pnpm dev
-      '
+    working_dir: /home/node
+    command:
+      - sh
+      - -c
+      - |
+        {
+          apk add --no-cache socat &&
+          rm -f /run/nuxt.sock &&
+          corepack enable &&
+          pnpm install
+        } || exit 1
+        socat \
+          UNIX-LISTEN:/run/nuxt.sock,fork,reuseaddr,mode=660,group=$$NITRO_SOCKET_GID \
+          TCP:127.0.0.1:3000 \
+        &
+        exec pnpm dev
+
+  proxy:
+    stop_signal: SIGTERM

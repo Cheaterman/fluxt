@@ -4,11 +4,6 @@ export default defineNuxtConfig({
     localApiEndpoint: '/_nuxt_icon_api',
   },
   modules: ['@nuxt/ui'],
-  vite: {
-    server: {
-      allowedHosts: ['frontend'],
-    },
-  },
   compatibilityDate: '2025-04-01',
   typescript: {
     typeCheck: true,
