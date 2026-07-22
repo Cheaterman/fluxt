@@ -1,6 +1,7 @@
 {
   "extends": "./.nuxt/tsconfig.json",
   "compilerOptions": {
-    "plugins": [{ "name": "@vue/typescript-plugin" }]
+    "plugins": [{ "name": "@vue/typescript-plugin" }],
+    "noErrorTruncation": true
   }
 }

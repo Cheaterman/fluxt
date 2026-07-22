@@ -31,7 +31,7 @@ def load_dotenv() -> None:
 
 
 @pytest.fixture(scope='session')
-def app() -> collections.abc.Generator[Flask, None, None]:
+def app(load_dotenv: None) -> collections.abc.Generator[Flask, None, None]:
     app = create_app({
         'TESTING': 'True',
         'STREAM_REFRESH_INTERVAL': 0,
